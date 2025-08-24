@@ -46,6 +46,11 @@
       </li> -->
     </ul>
     <div class="add-form">
+      <div id="response-info" style="display: none;" class="respond-to">
+        <div>Ответ на комментарий:</div>
+        <div id="response-author"></div>
+        <div id="response-text"></div>
+      </div>
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
       <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"></textarea>
       <div class="add-form-row">
@@ -61,6 +66,12 @@
   const textInput = document.querySelector('.add-form-text');
   const commentsList = document.querySelector('.comments');
   const addButton = document.querySelector('.add-form-button');
+  const responseInfo = document.getElementById('response-info');
+  const responseAuthor = document.getElementById('response-author');
+  const responseText = document.getElementById('response-text');  
+
+  let respond = null;
+
 
   // Массив с информацией о каждом комментарии
   const comments = [
@@ -69,14 +80,16 @@
       date: "12.02.22 12:18",
       commentText: "Это будет первый комментарий на этой странице",
       likes: 3,
-      isLiked: false
+      isLiked: false,
+      replies: []
     },
     {
       userName: "Варвара Н.",
       date: "13.02.22 19:22",
       commentText: "Мне нравится как оформлена эта страница! ❤",
       likes: 75,
-      isLiked: true
+      isLiked: true,
+      replies: []
     }
   ];
 
@@ -96,7 +109,18 @@
   const renderComments = () => {
     const commentsHTML = comments.map((comment, index) => {
       const likeClass = comment.isLiked ? ' -active-like' : '';
-      return `
+
+      const escapedUserName = comment.userName.replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+
+      const escapedCommentText = comment.commentText.replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;'); 
+        
+      const userReplies = comment.replies.map(reply => {
+      const escapedUserReplies = reply.userName.replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+
+        return `
         <li class="comment" data-index="${index}">
           <div class="comment-header">
             <div>${comment.userName}</div>
@@ -115,12 +139,58 @@
           </div>
         </li>
       `;
+      }).join('');
+
+      return `
+      <li class="comment" data-index="${index}">
+          <div class="comment-header">
+            <div>${escapedUserName}</div>
+            <div>${comment.date}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text">
+              ${escapedCommentText}
+            </div>
+          </div>
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">${comment.likes}</span>
+              <button class="like-button${likeClass}" data-index="${index}"></button>
+            </div>
+          </div>
+          ${comment.replies.length > 0 ? `<ul>${userReplies}</ul>` : ''}
+        </li>
+      `;      
     }).join('');
 
     commentsList.innerHTML = commentsHTML;
 
+    // Добавляем обработчики кликов на коментарий
+    initCommentClick();
     // Добавляем обработчики кликов на лайки
     initLike();
+  };
+
+  // Обработчик клина на коментарий
+  const initCommentClick = () => {
+    const commentElements = document.querySelectorAll('.comment');
+
+    for (const commentElement of commentElements) {
+      commentElement.addEventListener('click', (event) => {               
+        if (event.target.closest('.like-button')) {
+          return;
+        }
+
+        const index = commentElement.dataset.index; 
+        const comment = comments[index];
+
+        respond = index;        
+
+        // Заполнение поле текста
+        textInput.value = `> ${comment.userName}: ${comment.commentText}\n\n`;
+        textInput.focus();
+      });
+    };   
   };
 
   // Обработчик клика на лайк
@@ -143,18 +213,22 @@
   };
 
   addButton.addEventListener('click', () => {
-    if (nameInput.value.trim() === '' || textInput.value.trim() === '') {
+    const userName = nameInput.value.replaceAll('<', '&lt;').replaceAll('>', '&gt;').trim();
+    const commentText = textInput.value.replaceAll('<', '&lt;').replaceAll('>', '&gt;').trim();
+
+    if (userName === '' || commentText === '') {
       alert('Пожалуйста, заполните все поля');
       return;
     }
 
     // Добавление нового комментария в массив
     comments.push({
-      userName: nameInput.value,
-      date: formatDate(),
-      commentText: textInput.value,
-      likes: 0,
-      isLiked: false
+        userName: userName,
+        date: formatDate(),
+        commentText: commentText,
+        likes: 0,
+        isLiked: false,
+        replies: []
     });
 
     // Перерисовываем комментарии
