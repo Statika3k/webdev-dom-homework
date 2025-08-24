@@ -128,7 +128,8 @@
     const likeButtons = document.querySelectorAll('.like-button');
 
     for (const likeButton of likeButtons) {
-      likeButton.addEventListener('click', (event) => {        
+      likeButton.addEventListener('click', (event) => {  
+        event.stopPropagation();      
         const index = (likeButton.dataset.index); 
         const comment = comments[index];
 
