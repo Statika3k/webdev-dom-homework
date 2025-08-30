@@ -38,6 +38,11 @@
 
   let respond = null;
 
+  // Для заменя опасных символов
+  const sanitizeHtml = (value) => {
+    return value.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  }
+
 
   // Массив с информацией о каждом комментарии
   const comments = [
