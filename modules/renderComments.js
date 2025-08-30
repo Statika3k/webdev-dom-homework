@@ -1,19 +1,20 @@
-import { comments } from "./commentsInfo.js";
-import {initCommentClick, initLike} from "./initListeners.js"
-import { sanitizeHtml } from "./helpers.js";
+import { comments } from './commentsInfo.js'
+import { initCommentClick, initLike } from './initListeners.js'
+import { sanitizeHtml } from './helpers.js'
 
-const commentsList = document.querySelector('.comments');
+const commentsList = document.querySelector('.comments')
 
 // Функция рендеринга комментариев
-  export const renderComments = () => {
-    const commentsHTML = comments.map((comment, index) => {
-      const likeClass = comment.isLiked ? ' -active-like' : '';
+export const renderComments = () => {
+    const commentsHTML = comments
+        .map((comment, index) => {
+            const likeClass = comment.isLiked ? ' -active-like' : ''
 
-      const escapedUserName = sanitizeHtml(comment.userName);
+            const escapedUserName = sanitizeHtml(comment.userName)
 
-      const escapedCommentText = sanitizeHtml(comment.commentText); 
-        
-      return `
+            const escapedCommentText = sanitizeHtml(comment.commentText)
+
+            return `
       <li class="comment" data-index="${index}">
           <div class="comment-header">
             <div>${escapedUserName}</div>
@@ -31,13 +32,14 @@ const commentsList = document.querySelector('.comments');
             </div>
           </div>          
         </li>
-      `;      
-    }).join('');
+      `
+        })
+        .join('')
 
-    commentsList.innerHTML = commentsHTML;
+    commentsList.innerHTML = commentsHTML
 
     // Добавляем обработчики кликов на комментарий
-    initCommentClick();
+    initCommentClick()
     // Добавляем обработчики кликов на лайки
-    initLike();
-  };
+    initLike()
+}

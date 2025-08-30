@@ -1,46 +1,48 @@
-import { renderComments } from "./renderComments.js";
-import { comments } from "./commentsInfo.js";
+import { renderComments } from './renderComments.js'
+import { comments } from './commentsInfo.js'
 
-export let respond = null;
+export let respond = null
 
 // Обработчик клина на коментарий
-  export const initCommentClick = () => {
-    const commentElements = document.querySelectorAll('.comment');
-    const textInput = document.querySelector(".add-form-text");
+export const initCommentClick = () => {
+    const commentElements = document.querySelectorAll('.comment')
+    const textInput = document.querySelector('.add-form-text')
 
     for (const commentElement of commentElements) {
-      commentElement.addEventListener('click', (event) => {               
-        if (event.target.closest('.like-button')) {
-          return;
-        }
+        commentElement.addEventListener('click', (event) => {
+            if (event.target.closest('.like-button')) {
+                return
+            }
 
-        const index = commentElement.dataset.index; 
-        const comment = comments[index];
+            const index = commentElement.dataset.index
+            const comment = comments[index]
 
-        respond = index;        
+            respond = index
 
-        // Заполнение поле текста
-        textInput.value = `> ${comment.userName}: ${comment.commentText}\n\n`;
-        textInput.focus();
-      });
-    };   
-  };
+            // Заполнение поле текста
+            textInput.value = `> ${comment.userName}: ${comment.commentText}\n\n`
+            textInput.focus()
+        })
+    }
+}
 
-  // Обработчик клика на лайк
-  export const initLike = () => {
-    const likeButtons = document.querySelectorAll('.like-button');
+// Обработчик клика на лайк
+export const initLike = () => {
+    const likeButtons = document.querySelectorAll('.like-button')
 
     for (const likeButton of likeButtons) {
-      likeButton.addEventListener('click', (event) => {  
-        event.stopPropagation();      
-        const index = (likeButton.dataset.index); 
-        const comment = comments[index];
+        likeButton.addEventListener('click', (event) => {
+            event.stopPropagation()
+            const index = likeButton.dataset.index
+            const comment = comments[index]
 
-        comment.isLiked = !comment.isLiked;
+            comment.isLiked = !comment.isLiked
 
-        // Обновляем количество лайков
-        comment.likes = comment.isLiked ? comment.likes + 1 : comment.likes - 1;
-        renderComments();
-      });
-    };
-  };
+            // Обновляем количество лайков
+            comment.likes = comment.isLiked
+                ? comment.likes + 1
+                : comment.likes - 1
+            renderComments()
+        })
+    }
+}
