@@ -9,41 +9,7 @@
 
 <body>
   <div class="container">
-    <ul class="comments">
-      <!-- <li class="comment">
-        <div class="comment-header">
-          <div>Глеб Фокин</div>
-          <div>12.02.22 12:18</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Это будет первый комментарий на этой странице
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">3</span>
-            <button class="like-button"></button>
-          </div>
-        </div>
-      </li>
-      <li class="comment">
-        <div class="comment-header">
-          <div>Варвара Н.</div>
-          <div>13.02.22 19:22</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Мне нравится как оформлена эта страница! ❤
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">75</span>
-            <button class="like-button -active-like"></button>
-          </div>
-        </div>
-      </li> -->
+    <ul class="comments">      
     </ul>
     <div class="add-form">
       <div id="response-info" style="display: none;" class="respond-to">
@@ -71,6 +37,11 @@
   const responseText = document.getElementById('response-text');  
 
   let respond = null;
+
+  // Для заменя опасных символов
+  const sanitizeHtml = (value) => {
+    return value.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  }
 
 
   // Массив с информацией о каждом комментарии
@@ -110,37 +81,10 @@
     const commentsHTML = comments.map((comment, index) => {
       const likeClass = comment.isLiked ? ' -active-like' : '';
 
-      const escapedUserName = comment.userName.replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
+      const escapedUserName = sanitizeHtml(comment.userName);
 
-      const escapedCommentText = comment.commentText.replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;'); 
+      const escapedCommentText = sanitizeHtml(comment.commentText); 
         
-      const userReplies = comment.replies.map(reply => {
-      const escapedUserReplies = reply.userName.replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
-
-        return `
-        <li class="comment" data-index="${index}">
-          <div class="comment-header">
-            <div>${comment.userName}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${comment.commentText}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button class="like-button${likeClass}" data-index="${index}"></button>
-            </div>
-          </div>
-        </li>
-      `;
-      }).join('');
-
       return `
       <li class="comment" data-index="${index}">
           <div class="comment-header">
@@ -213,8 +157,8 @@
   };
 
   addButton.addEventListener('click', () => {
-    const userName = nameInput.value.replaceAll('<', '&lt;').replaceAll('>', '&gt;').trim();
-    const commentText = textInput.value.replaceAll('<', '&lt;').replaceAll('>', '&gt;').trim();
+    const userName = sanitizeHtml(nameInput.value.trim());
+    const commentText = sanitizeHtml(textInput.value.trim());
 
     if (userName === '' || commentText === '') {
       alert('Пожалуйста, заполните все поля');
