@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Statika3k/webdev-dom-homework#readme",
   "dependencies": {
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "prettier": "^3.6.2"
   }
 }
