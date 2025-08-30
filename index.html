@@ -1,191 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+    <head>
+        <title>Проект "Комменты"</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
 
-<head>
-  <title>Проект "Комменты"</title>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-
-<body>
-  <div class="container">
-    <ul class="comments">      
-    </ul>
-    <div class="add-form">
-      <div id="response-info" style="display: none;" class="respond-to">
-        <div>Ответ на комментарий:</div>
-        <div id="response-author"></div>
-        <div id="response-text"></div>
-      </div>
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"></textarea>
-      <div class="add-form-row">
-        <button class="add-form-button">Написать</button>
-      </div>
-    </div>
-  </div>
-</body>
-
-<script>
-  "use strict";
-  const nameInput = document.querySelector('.add-form-name');
-  const textInput = document.querySelector('.add-form-text');
-  const commentsList = document.querySelector('.comments');
-  const addButton = document.querySelector('.add-form-button');
-  const responseInfo = document.getElementById('response-info');
-  const responseAuthor = document.getElementById('response-author');
-  const responseText = document.getElementById('response-text');  
-
-  let respond = null;
-
-  // Для заменя опасных символов
-  const sanitizeHtml = (value) => {
-    return value.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-  }
-
-
-  // Массив с информацией о каждом комментарии
-  const comments = [
-    {
-      userName: "Глеб Фокин",
-      date: "12.02.22 12:18",
-      commentText: "Это будет первый комментарий на этой странице",
-      likes: 3,
-      isLiked: false,
-      replies: []
-    },
-    {
-      userName: "Варвара Н.",
-      date: "13.02.22 19:22",
-      commentText: "Мне нравится как оформлена эта страница! ❤",
-      likes: 75,
-      isLiked: true,
-      replies: []
-    }
-  ];
-
-  // Получение текущей даты и времени
-  function formatDate() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = String(now.getFullYear()).slice(-2);
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-
-    return `${day}.${month}.${year} ${hours}:${minutes}`;
-  }
-
-  // Функция рендеринга комментариев
-  const renderComments = () => {
-    const commentsHTML = comments.map((comment, index) => {
-      const likeClass = comment.isLiked ? ' -active-like' : '';
-
-      const escapedUserName = sanitizeHtml(comment.userName);
-
-      const escapedCommentText = sanitizeHtml(comment.commentText); 
-        
-      return `
-      <li class="comment" data-index="${index}">
-          <div class="comment-header">
-            <div>${escapedUserName}</div>
-            <div>${comment.date}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${escapedCommentText}
+    <body>
+        <div class="container">
+            <ul class="comments"></ul>
+            <div class="add-form">
+                <div
+                    id="response-info"
+                    style="display: none"
+                    class="respond-to"
+                >
+                    <div>Ответ на комментарий:</div>
+                    <div id="response-author"></div>
+                    <div id="response-text"></div>
+                </div>
+                <input
+                    type="text"
+                    class="add-form-name"
+                    placeholder="Введите ваше имя"
+                />
+                <textarea
+                    type="textarea"
+                    class="add-form-text"
+                    placeholder="Введите ваш коментарий"
+                    rows="4"
+                ></textarea>
+                <div class="add-form-row">
+                    <button class="add-form-button">Написать</button>
+                </div>
             </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">${comment.likes}</span>
-              <button class="like-button${likeClass}" data-index="${index}"></button>
-            </div>
-          </div>
-          ${comment.replies.length > 0 ? `<ul>${userReplies}</ul>` : ''}
-        </li>
-      `;      
-    }).join('');
+        </div>
+    </body>
 
-    commentsList.innerHTML = commentsHTML;
-
-    // Добавляем обработчики кликов на коментарий
-    initCommentClick();
-    // Добавляем обработчики кликов на лайки
-    initLike();
-  };
-
-  // Обработчик клина на коментарий
-  const initCommentClick = () => {
-    const commentElements = document.querySelectorAll('.comment');
-
-    for (const commentElement of commentElements) {
-      commentElement.addEventListener('click', (event) => {               
-        if (event.target.closest('.like-button')) {
-          return;
-        }
-
-        const index = commentElement.dataset.index; 
-        const comment = comments[index];
-
-        respond = index;        
-
-        // Заполнение поле текста
-        textInput.value = `> ${comment.userName}: ${comment.commentText}\n\n`;
-        textInput.focus();
-      });
-    };   
-  };
-
-  // Обработчик клика на лайк
-  const initLike = () => {
-    const likeButtons = document.querySelectorAll('.like-button');
-
-    for (const likeButton of likeButtons) {
-      likeButton.addEventListener('click', (event) => {  
-        event.stopPropagation();      
-        const index = (likeButton.dataset.index); 
-        const comment = comments[index];
-
-        comment.isLiked = !comment.isLiked;
-
-        // Обновляем количество лайков
-        comment.likes = comment.isLiked ? comment.likes + 1 : comment.likes - 1;
-        renderComments();
-      });
-    };
-  };
-
-  addButton.addEventListener('click', () => {
-    const userName = sanitizeHtml(nameInput.value.trim());
-    const commentText = sanitizeHtml(textInput.value.trim());
-
-    if (userName === '' || commentText === '') {
-      alert('Пожалуйста, заполните все поля');
-      return;
-    }
-
-    // Добавление нового комментария в массив
-    comments.push({
-        userName: userName,
-        date: formatDate(),
-        commentText: commentText,
-        likes: 0,
-        isLiked: false,
-        replies: []
-    });
-
-    // Перерисовываем комментарии
-    renderComments();
-
-    // Очищаем поля ввода после добавления
-    nameInput.value = '';
-    textInput.value = '';
-  });
-
-  renderComments();
-
-  console.log("It works!");
-</script>
-
+    <script type="module" src="index.js"></script>
 </html>
