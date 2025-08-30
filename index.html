@@ -85,31 +85,6 @@
 
       const escapedCommentText = sanitizeHtml(comment.commentText); 
         
-      // const userReplies = comment.replies.map(reply => {
-      // const escapedUserReplies = reply.userName.replaceAll('<', '&lt;')
-      //   .replaceAll('>', '&gt;');
-
-      //   return `
-      //   <li class="comment" data-index="${index}">
-      //     <div class="comment-header">
-      //       <div>${comment.userName}</div>
-      //       <div>${comment.date}</div>
-      //     </div>
-      //     <div class="comment-body">
-      //       <div class="comment-text">
-      //         ${comment.commentText}
-      //       </div>
-      //     </div>
-      //     <div class="comment-footer">
-      //       <div class="likes">
-      //         <span class="likes-counter">${comment.likes}</span>
-      //         <button class="like-button${likeClass}" data-index="${index}"></button>
-      //       </div>
-      //     </div>
-      //   </li>
-      // `;
-      // }).join('');
-
       return `
       <li class="comment" data-index="${index}">
           <div class="comment-header">
