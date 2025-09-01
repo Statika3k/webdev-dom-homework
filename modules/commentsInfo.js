@@ -1,5 +1,5 @@
 // Массив с информацией о каждом комментарии
-export const comments = [
+export let comments = [
     {
         userName: 'Глеб Фокин',
         date: '12.02.22 12:18',

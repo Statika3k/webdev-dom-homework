@@ -1,7 +1,12 @@
 import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
+import { sanitizeHtml, formatDate } from './helpers.js'
 
 export let respond = null
+
+const nameInput = document.querySelector('.add-form-name')
+const textInput = document.querySelector('.add-form-text')
+const addButton = document.querySelector('.add-form-button')
 
 // Обработчик клина на коментарий
 export const initCommentClick = () => {
@@ -45,4 +50,34 @@ export const initLike = () => {
             renderComments()
         })
     }
+}
+
+// Обработчик добавления комментария
+export const initAddComment = (renderComments) => {
+    addButton.addEventListener('click', () => {
+    const userName = sanitizeHtml(nameInput.value.trim())
+    const commentText = sanitizeHtml(textInput.value.trim())
+
+    if (userName === '' || commentText === '') {
+        alert('Пожалуйста, заполните все поля')
+        return
+    }
+
+    // Добавление нового комментария в массив
+    comments.push({
+        userName: userName,
+        date: formatDate(),
+        commentText: commentText,
+        likes: 0,
+        isLiked: false,
+        replies: [],
+    })
+
+    // Перерисовываем комментарии
+    renderComments()
+
+    // Очищаем поля ввода после добавления
+    nameInput.value = ''
+    textInput.value = ''
+})
 }
