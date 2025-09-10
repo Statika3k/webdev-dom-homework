@@ -1,24 +1,22 @@
 import { comments } from './commentsInfo.js'
 import { initCommentClick, initLike } from './initListeners.js'
-import { sanitizeHtml } from './helpers.js'
+import { sanitizeHtml, formatDate } from './helpers.js'
 
 const commentsList = document.querySelector('.comments')
 
 // Функция рендеринга комментариев
-export const renderComments = () => {
+export const renderComments = () => {  
     const commentsHTML = comments
-        .map((comment, index) => {
-            const likeClass = comment.isLiked ? ' -active-like' : ''
-
-            const escapedUserName = sanitizeHtml(comment.userName)
-
-            const escapedCommentText = sanitizeHtml(comment.commentText)
+        .map((comment, index) => {          
+            const likeClass = comment.isLiked ? ' -active-like' : ''           
+            const escapedUserName = sanitizeHtml(comment.author.name)
+            const escapedCommentText = sanitizeHtml(comment.text)
 
             return `
       <li class="comment" data-index="${index}">
           <div class="comment-header">
             <div>${escapedUserName}</div>
-            <div>${comment.date}</div>
+            <div>${formatDate(comment.date)}</div>
           </div>
           <div class="comment-body">
             <div class="comment-text">
