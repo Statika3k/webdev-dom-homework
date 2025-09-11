@@ -1,6 +1,6 @@
 import { renderComments } from './renderComments.js'
-import { comments } from './commentsInfo.js'
-import { sanitizeHtml, formatDate } from './helpers.js'
+import { comments, updateComments } from './commentsInfo.js'
+import { sanitizeHtml } from './helpers.js'
 
 export let respond = null
 
@@ -25,7 +25,7 @@ export const initCommentClick = () => {
             respond = index
 
             // Заполнение поле текста
-            textInput.value = `> ${comment.userName}: ${comment.commentText}\n\n`
+            textInput.value = `> ${comment.author.name}: ${comment.text}\n\n`
             textInput.focus()
         })
     }
@@ -55,29 +55,44 @@ export const initLike = () => {
 // Обработчик добавления комментария
 export const initAddComment = (renderComments) => {
     addButton.addEventListener('click', () => {
-    const userName = sanitizeHtml(nameInput.value.trim())
-    const commentText = sanitizeHtml(textInput.value.trim())
+        const userName = nameInput.value.trim()
+        const commentText = textInput.value.trim()
 
-    if (userName === '' || commentText === '') {
-        alert('Пожалуйста, заполните все поля')
-        return
-    }
+        if (userName === '' || commentText === '') {
+            alert('Пожалуйста, заполните все поля')
+            return
+        }
 
-    // Добавление нового комментария в массив
-    comments.push({
-        userName: userName,
-        date: formatDate(),
-        commentText: commentText,
-        likes: 0,
-        isLiked: false,
-        replies: [],
+        fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: sanitizeHtml(userName),
+                text: sanitizeHtml(commentText),
+            }),
+        })
+            .then((response) => {
+                return response.json()
+            })
+            .then((data) => {
+                if (data) {
+                    fetch(
+                        'https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments',
+                        {
+                            method: 'GET',
+                        },
+                    )
+                        .then((response) => {
+                            return response.json()
+                        })
+                        .then((data) => {
+                            updateComments(data.comments)
+                            renderComments()
+                        })
+                }
+            })
+
+        // Очищаем поля ввода после добавления
+        nameInput.value = ''
+        textInput.value = ''
     })
-
-    // Перерисовываем комментарии
-    renderComments()
-
-    // Очищаем поля ввода после добавления
-    nameInput.value = ''
-    textInput.value = ''
-})
 }
