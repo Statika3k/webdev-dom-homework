@@ -1,6 +1,7 @@
 import { renderComments } from './renderComments.js'
-import { comments, updateComments } from './commentsInfo.js'
+import { comments } from './commentsInfo.js'
 import { sanitizeHtml } from './helpers.js'
+import { fetchAndRender } from './fetchAndRender.js'
 
 export let respond = null
 
@@ -69,27 +70,10 @@ export const initAddComment = (renderComments) => {
                 name: sanitizeHtml(userName),
                 text: sanitizeHtml(commentText),
             }),
+        }).then(() => {
+            return fetchAndRender()
         })
-            .then((response) => {
-                return response.json()
-            })
-            .then((data) => {
-                if (data) {
-                    fetch(
-                        'https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments',
-                        {
-                            method: 'GET',
-                        },
-                    )
-                        .then((response) => {
-                            return response.json()
-                        })
-                        .then((data) => {
-                            updateComments(data.comments)
-                            renderComments()
-                        })
-                }
-            })
+
 
         // Очищаем поля ввода после добавления
         nameInput.value = ''
