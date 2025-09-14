@@ -1,6 +1,6 @@
 import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
-import { sanitizeHtml } from './helpers.js'
+import { sanitizeHtml, delay } from './helpers.js'
 import { fetchAndRender } from './fetchAndRender.js'
 import { showFormLoader, hideFormLoader } from './loader.js'
 
@@ -42,13 +42,22 @@ export const initLike = () => {
             const index = likeButton.dataset.index
             const comment = comments[index]
 
-            comment.isLiked = !comment.isLiked
+            likeButton.disabled = true
+            likeButton.classList.add('-loading-like')
 
-            // Обновляем количество лайков
-            comment.likes = comment.isLiked
-                ? comment.likes + 1
-                : comment.likes - 1
-            renderComments()
+            delay(2000)
+                .then(() => {
+                    comment.likes = comment.isLiked
+                        ? comment.likes - 1
+                        : comment.likes + 1
+                    comment.isLiked = !comment.isLiked
+                    comment.isLikeLoading = false
+                    renderComments()
+                })
+                .finally(() => {                    
+                    likeButton.disabled = false
+                    likeButton.classList.remove('-loading-like')
+                })
         })
     }
 }
