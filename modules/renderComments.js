@@ -5,10 +5,10 @@ import { sanitizeHtml, formatDate } from './helpers.js'
 const commentsList = document.querySelector('.comments')
 
 // Функция рендеринга комментариев
-export const renderComments = () => {  
+export const renderComments = () => {
     const commentsHTML = comments
-        .map((comment, index) => {          
-            const likeClass = comment.isLiked ? ' -active-like' : ''           
+        .map((comment, index) => {
+            const likeClass = comment.isLiked ? ' -active-like' : ''
             const escapedUserName = sanitizeHtml(comment.author.name)
             const escapedCommentText = sanitizeHtml(comment.text)
 

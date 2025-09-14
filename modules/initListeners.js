@@ -2,6 +2,7 @@ import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
 import { sanitizeHtml } from './helpers.js'
 import { fetchAndRender } from './fetchAndRender.js'
+import { showFormLoader, hideFormLoader } from './loader.js'
 
 export let respond = null
 
@@ -12,7 +13,6 @@ const addButton = document.querySelector('.add-form-button')
 // Обработчик клина на коментарий
 export const initCommentClick = () => {
     const commentElements = document.querySelectorAll('.comment')
-    const textInput = document.querySelector('.add-form-text')
 
     for (const commentElement of commentElements) {
         commentElement.addEventListener('click', (event) => {
@@ -54,7 +54,7 @@ export const initLike = () => {
 }
 
 // Обработчик добавления комментария
-export const initAddComment = () => {
+export const initAddComment = (renderComments) => {
     addButton.addEventListener('click', () => {
         const userName = nameInput.value.trim()
         const commentText = textInput.value.trim()
@@ -64,19 +64,30 @@ export const initAddComment = () => {
             return
         }
 
+        showFormLoader()
+
+        addButton.disabled = true
+
         fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
             method: 'POST',
             body: JSON.stringify({
                 name: sanitizeHtml(userName),
                 text: sanitizeHtml(commentText),
             }),
-        }).then(() => {
-            return fetchAndRender()
         })
-
-
-        // Очищаем поля ввода после добавления
-        nameInput.value = ''
-        textInput.value = ''
+            .then((response) => {
+                return response.json()
+            })
+            .then(() => {
+                return fetchAndRender()
+            })
+            .then(() => {
+                nameInput.value = ''
+                textInput.value = ''
+            })
+            .finally(() => {
+                hideFormLoader()
+                addButton.disabled = false
+            })
     })
 }
