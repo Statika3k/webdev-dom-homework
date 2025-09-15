@@ -54,7 +54,7 @@ export const initLike = () => {
                     comment.isLikeLoading = false
                     renderComments()
                 })
-                .finally(() => {                    
+                .finally(() => {
                     likeButton.disabled = false
                     likeButton.classList.remove('-loading-like')
                 })
@@ -68,8 +68,8 @@ export const initAddComment = (renderComments) => {
         const userName = nameInput.value.trim()
         const commentText = textInput.value.trim()
 
-        if (userName === '' || commentText === '') {
-            alert('Пожалуйста, заполните все поля')
+        if (userName.length < 3 || commentText.length < 3) {
+            alert('Имя и комментарий должны быть не короче 3 символов')
             return
         }
 
@@ -82,17 +82,34 @@ export const initAddComment = (renderComments) => {
             body: JSON.stringify({
                 name: sanitizeHtml(userName),
                 text: sanitizeHtml(commentText),
+                forceError: true,
             }),
         })
             .then((response) => {
+                if (response.status === 500) {
+                    throw new Error('Сервер сломался, попробуй позже')
+                }
+                if (response.status === 400) {
+                    throw new Error(
+                        'Имя и комментарий должны быть не короче 3 символов',
+                    )
+                }
+                if (!response.ok) {
+                    throw new Error('Произошла ошибка, попробуйте еще раз')
+                }
                 return response.json()
-            })
-            .then(() => {
-                return fetchAndRender()
             })
             .then(() => {
                 nameInput.value = ''
                 textInput.value = ''
+                return fetchAndRender()
+            })
+            .catch((error) => {
+                if (error.message ==='Failed to fetch') {
+                    alert('Кажется, у вас сломался интернет, попробуйте позже')
+                } else {
+                    alert(error.message)
+                }
             })
             .finally(() => {
                 hideFormLoader()
