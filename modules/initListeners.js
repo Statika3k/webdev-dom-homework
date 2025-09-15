@@ -1,6 +1,8 @@
 import { renderComments } from './renderComments.js'
-import { comments, updateComments } from './commentsInfo.js'
-import { sanitizeHtml } from './helpers.js'
+import { comments } from './commentsInfo.js'
+import { sanitizeHtml, delay } from './helpers.js'
+import { fetchAndRender } from './fetchAndRender.js'
+import { showFormLoader, hideFormLoader } from './loader.js'
 
 export let respond = null
 
@@ -11,7 +13,6 @@ const addButton = document.querySelector('.add-form-button')
 // Обработчик клина на коментарий
 export const initCommentClick = () => {
     const commentElements = document.querySelectorAll('.comment')
-    const textInput = document.querySelector('.add-form-text')
 
     for (const commentElement of commentElements) {
         commentElement.addEventListener('click', (event) => {
@@ -41,13 +42,22 @@ export const initLike = () => {
             const index = likeButton.dataset.index
             const comment = comments[index]
 
-            comment.isLiked = !comment.isLiked
+            likeButton.disabled = true
+            likeButton.classList.add('-loading-like')
 
-            // Обновляем количество лайков
-            comment.likes = comment.isLiked
-                ? comment.likes + 1
-                : comment.likes - 1
-            renderComments()
+            delay(2000)
+                .then(() => {
+                    comment.likes = comment.isLiked
+                        ? comment.likes - 1
+                        : comment.likes + 1
+                    comment.isLiked = !comment.isLiked
+                    comment.isLikeLoading = false
+                    renderComments()
+                })
+                .finally(() => {                    
+                    likeButton.disabled = false
+                    likeButton.classList.remove('-loading-like')
+                })
         })
     }
 }
@@ -63,6 +73,10 @@ export const initAddComment = (renderComments) => {
             return
         }
 
+        showFormLoader()
+
+        addButton.disabled = true
+
         fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
             method: 'POST',
             body: JSON.stringify({
@@ -73,26 +87,16 @@ export const initAddComment = (renderComments) => {
             .then((response) => {
                 return response.json()
             })
-            .then((data) => {
-                if (data) {
-                    fetch(
-                        'https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments',
-                        {
-                            method: 'GET',
-                        },
-                    )
-                        .then((response) => {
-                            return response.json()
-                        })
-                        .then((data) => {
-                            updateComments(data.comments)
-                            renderComments()
-                        })
-                }
+            .then(() => {
+                return fetchAndRender()
             })
-
-        // Очищаем поля ввода после добавления
-        nameInput.value = ''
-        textInput.value = ''
+            .then(() => {
+                nameInput.value = ''
+                textInput.value = ''
+            })
+            .finally(() => {
+                hideFormLoader()
+                addButton.disabled = false
+            })
     })
 }
