@@ -1,7 +1,7 @@
 import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
-import { sanitizeHtml, delay } from './helpers.js'
-import { fetchAndRender } from './fetchAndRender.js'
+import { delay } from './helpers.js'
+import { fetchAndRender, postComment } from './fetchAndRender.js'
 import { showFormLoader, hideFormLoader } from './loader.js'
 
 export let respond = null
@@ -77,39 +77,14 @@ export const initAddComment = (renderComments) => {
 
         addButton.disabled = true
 
-        fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
-            method: 'POST',
-            body: JSON.stringify({
-                name: sanitizeHtml(userName),
-                text: sanitizeHtml(commentText),
-                forceError: true,
-            }),
-        })
-            .then((response) => {
-                if (response.status === 500) {
-                    throw new Error('Сервер сломался, попробуй позже')
-                }
-                if (response.status === 400) {
-                    throw new Error(
-                        'Имя и комментарий должны быть не короче 3 символов',
-                    )
-                }
-                if (!response.ok) {
-                    throw new Error('Произошла ошибка, попробуйте еще раз')
-                }
-                return response.json()
-            })
+        postComment(userName, commentText)
             .then(() => {
                 nameInput.value = ''
                 textInput.value = ''
                 return fetchAndRender()
             })
             .catch((error) => {
-                if (error.message ==='Failed to fetch') {
-                    alert('Кажется, у вас сломался интернет, попробуйте позже')
-                } else {
-                    alert(error.message)
-                }
+                alert(error.message)
             })
             .finally(() => {
                 hideFormLoader()
