@@ -1,7 +1,7 @@
 import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
-import { sanitizeHtml, delay } from './helpers.js'
-import { fetchAndRender } from './fetchAndRender.js'
+import { delay } from './helpers.js'
+import { fetchAndRender, postComment } from './fetchAndRender.js'
 import { showFormLoader, hideFormLoader } from './loader.js'
 
 export let respond = null
@@ -54,7 +54,7 @@ export const initLike = () => {
                     comment.isLikeLoading = false
                     renderComments()
                 })
-                .finally(() => {                    
+                .finally(() => {
                     likeButton.disabled = false
                     likeButton.classList.remove('-loading-like')
                 })
@@ -63,13 +63,13 @@ export const initLike = () => {
 }
 
 // Обработчик добавления комментария
-export const initAddComment = (renderComments) => {
+export const initAddComment = () => {
     addButton.addEventListener('click', () => {
         const userName = nameInput.value.trim()
         const commentText = textInput.value.trim()
 
-        if (userName === '' || commentText === '') {
-            alert('Пожалуйста, заполните все поля')
+        if (userName.length < 3 || commentText.length < 3) {
+            alert('Имя и комментарий должны быть не короче 3 символов')
             return
         }
 
@@ -77,22 +77,14 @@ export const initAddComment = (renderComments) => {
 
         addButton.disabled = true
 
-        fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
-            method: 'POST',
-            body: JSON.stringify({
-                name: sanitizeHtml(userName),
-                text: sanitizeHtml(commentText),
-            }),
-        })
-            .then((response) => {
-                return response.json()
-            })
-            .then(() => {
-                return fetchAndRender()
-            })
+        postComment(userName, commentText)
             .then(() => {
                 nameInput.value = ''
                 textInput.value = ''
+                return fetchAndRender()
+            })
+            .catch((error) => {
+                alert(error.message)
             })
             .finally(() => {
                 hideFormLoader()
