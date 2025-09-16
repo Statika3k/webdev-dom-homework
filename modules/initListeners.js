@@ -63,7 +63,7 @@ export const initLike = () => {
 }
 
 // Обработчик добавления комментария
-export const initAddComment = (renderComments) => {
+export const initAddComment = () => {
     addButton.addEventListener('click', () => {
         const userName = nameInput.value.trim()
         const commentText = textInput.value.trim()
