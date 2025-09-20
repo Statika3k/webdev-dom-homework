@@ -1,5 +1,4 @@
 import { renderComments } from './renderComments.js'
-// import { initAddComment } from './initListeners.js'
 import { updateComments } from './commentsInfo.js'
 import { hideLoader } from './loader.js'
 import { sanitizeHtml, delay } from './helpers.js'
@@ -8,19 +7,23 @@ const host = 'https://wedev-api.sky.pro/api/v2/nina-shakhanova'
 
 const authToken = 'https://wedev-api.sky.pro/api/user'
 
-let token = ''
+export let token = ''
 export const updateToken = (newToken) => {
     token = newToken
+}
+
+export let currentUserName = ''
+export const setCurrentUserName = (userName) => {
+    currentUserName = userName
 }
 
 export const getComments = () => {
     return fetch(host + '/comments', {
         method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
     })
         .then((response) => {
+            if (response.status === 500) throw new Error('server')
+            if (!response.ok) throw new Error('other')
             return response.json()
         })
         .then((data) => {
@@ -30,7 +33,7 @@ export const getComments = () => {
         })
 }
 
-export const postComment = (userName, commentText, retries = 0) => {
+export const postComment = (commentText, retries = 0) => {
     const maxRetries = 3
     return fetch(host + '/comments', {
         method: 'POST',
@@ -38,70 +41,48 @@ export const postComment = (userName, commentText, retries = 0) => {
             Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-            name: sanitizeHtml(userName),
             text: sanitizeHtml(commentText),
             forceError: true,
         }),
     })
-        .then((response) => {
-            if (response.status === 500) {
-                if (retries < maxRetries) {
-                    return delay(1000).then(() =>
-                        postComment(userName, commentText, retries + 1),
-                    )
-                }
-                throw new Error('Сервер сломался, попробуй позже')
-            }
-            if (response.status === 400) {
-                throw new Error(
-                    'Имя и комментарий должны быть не короче 3 символов',
-                )
-            }
-            if (!response.ok) {
-                throw new Error('Произошла ошибка, попробуйте еще раз')
-            }
-            return response.json()
-        })
-        .catch((error) => {
-            if (error.message === 'Failed to fetch') {
-                throw new Error(
-                    'Кажется, у вас сломался интернет, попробуйте позже',
-                )
-            }
-        })
+    .then((response) => {
+        if (response.status === 500 && retries < maxRetries) {
+            return delay(1000).then(() => postComment(commentText, retries + 1))
+        }
+        if (response.status === 400) throw new Error('Имя и комментарий должны быть не короче 3 символов')
+        if (!response.ok) throw new Error('Произошла ошибка, попробуйте еще раз')
+        return response.json()
+    })
 }
 
 export const login = ({ login, password }) => {
     return fetch(`${authToken}/login`, {
         method: 'POST',
-        body: JSON.stringify({
-            login,
-            password
-        }),
-    }).then((response) => {
+        body: JSON.stringify({ login, password }),
+    })
+    .then((response) => {
         if (response.status === 400) {
             throw new Error('Введен неверный логин или пароль')
-        }
+        } 
         if (response.status === 201) {
             return response.json()
-        }        
+        } 
+        throw new Error('Ошибка сервера')
     })
 }
 
 export const registration = ({ login, name, password }) => {
     return fetch(authToken, {
         method: 'POST',
-        body: JSON.stringify({
-            login,
-            name,
-            password
-        }),
-    }).then((response) => {
+        body: JSON.stringify({ login, name, password }),
+    })
+    .then((response) => {
         if (response.status === 400) {
             throw new Error('Пользователь с таким логином уже существует')
         }
         if (response.status === 201) {
             return response.json()
-        }        
+        }
+        throw new Error('Ошибка сервера: ' + response.status)
     })
 }

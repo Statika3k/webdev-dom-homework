@@ -1,26 +1,24 @@
 import { getComments } from './modules/api.js'
 import { initLoader, showLoader, hideLoader } from './modules/loader.js'
-import { renderLogin } from './modules/renderLogin.js'
+import { renderComments } from './modules/renderComments.js'
 
 function initApp() {
-    const app = document.getElementById('app')
-    if (!app) {
-        const appDiv = document.createElement('div')
-        appDiv.id = 'app'
-        document.body.appendChild(appDiv)
-    }
-
     initLoader()
     showLoader()
-
-
-getComments()
-    .then(() => {
-        hideLoader()
-    }).catch(error => {
-        // Если не авторизован или ошибка
-        hideLoader()
-        renderLogin()
-    })
+    
+    // Показываем заглушку загрузки
+    document.getElementById('app').innerHTML = 
+        '<div class="container"><p>Пожалуйста подождите, загружаю комментарии...</p></div>'
+    
+    // Загружаем комментарии
+    getComments()
+        .then(() => {
+            hideLoader()
+        })
+        .catch(error => {
+            hideLoader()
+            renderComments()
+        })
 }
+
 initApp()
