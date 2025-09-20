@@ -1,7 +1,7 @@
 import { renderComments } from './renderComments.js'
 import { comments } from './commentsInfo.js'
 import { delay } from './helpers.js'
-import { fetchAndRender, postComment } from './fetchAndRender.js'
+import { getComments, postComment } from './api.js'
 import { showFormLoader, hideFormLoader } from './loader.js'
 
 export let respond = null
@@ -81,7 +81,7 @@ export const initAddComment = () => {
             .then(() => {
                 nameInput.value = ''
                 textInput.value = ''
-                return fetchAndRender()
+                return getComments()
             })
             .catch((error) => {
                 alert(error.message)

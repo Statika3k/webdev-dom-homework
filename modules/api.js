@@ -1,12 +1,24 @@
 import { renderComments } from './renderComments.js'
-import { initAddComment } from './initListeners.js'
+// import { initAddComment } from './initListeners.js'
 import { updateComments } from './commentsInfo.js'
 import { hideLoader } from './loader.js'
 import { sanitizeHtml, delay } from './helpers.js'
 
-export const fetchAndRender = () => {
-    return fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
+const host = 'https://wedev-api.sky.pro/api/v2/nina-shakhanova'
+
+const authToken = 'https://wedev-api.sky.pro/api/user'
+
+let token = ''
+export const updateToken = (newToken) => {
+    token = newToken
+}
+
+export const getComments = () => {
+    return fetch(host + '/comments', {
         method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     })
         .then((response) => {
             return response.json()
@@ -20,8 +32,11 @@ export const fetchAndRender = () => {
 
 export const postComment = (userName, commentText, retries = 0) => {
     const maxRetries = 3
-    return fetch('https://wedev-api.sky.pro/api/v1/nina-shakhanova/comments', {
+    return fetch(host + '/comments', {
         method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
             name: sanitizeHtml(userName),
             text: sanitizeHtml(commentText),
@@ -52,8 +67,41 @@ export const postComment = (userName, commentText, retries = 0) => {
                 throw new Error(
                     'Кажется, у вас сломался интернет, попробуйте позже',
                 )
-            }             
+            }
         })
 }
 
-initAddComment(renderComments)
+export const login = ({ login, password }) => {
+    return fetch(`${authToken}/login`, {
+        method: 'POST',
+        body: JSON.stringify({
+            login,
+            password
+        }),
+    }).then((response) => {
+        if (response.status === 400) {
+            throw new Error('Введен неверный логин или пароль')
+        }
+        if (response.status === 201) {
+            return response.json()
+        }        
+    })
+}
+
+export const registration = ({ login, name, password }) => {
+    return fetch(authToken, {
+        method: 'POST',
+        body: JSON.stringify({
+            login,
+            name,
+            password
+        }),
+    }).then((response) => {
+        if (response.status === 400) {
+            throw new Error('Пользователь с таким логином уже существует')
+        }
+        if (response.status === 201) {
+            return response.json()
+        }        
+    })
+}

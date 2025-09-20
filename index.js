@@ -1,6 +1,26 @@
-import { fetchAndRender } from './modules/fetchAndRender.js'
-import { initLoader, showLoader } from './modules/loader.js'
+import { getComments } from './modules/api.js'
+import { initLoader, showLoader, hideLoader } from './modules/loader.js'
+import { renderLogin } from './modules/renderLogin.js'
 
-initLoader()
-showLoader()
-fetchAndRender()
+function initApp() {
+    const app = document.getElementById('app')
+    if (!app) {
+        const appDiv = document.createElement('div')
+        appDiv.id = 'app'
+        document.body.appendChild(appDiv)
+    }
+
+    initLoader()
+    showLoader()
+
+
+getComments()
+    .then(() => {
+        hideLoader()
+    }).catch(error => {
+        // Если не авторизован или ошибка
+        hideLoader()
+        renderLogin()
+    })
+}
+initApp()

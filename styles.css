@@ -122,6 +122,10 @@ body {
     flex-direction: column;
   }
 
+  .add-form__login {
+    width: 436px;
+  }
+
   .add-form-name,
   .add-form-text {
     font-size: 16px;
@@ -146,6 +150,13 @@ body {
     justify-content: flex-end;
   }
 
+  .add-form-input {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .add-form-button {
     margin-top: 24px;
     font-size: 24px;
@@ -168,4 +179,9 @@ body {
 .add-form,
 .add-form-loader {
     transition: opacity 0.3s ease;
+}
+
+.add-form-link {
+  color: blue;
+  padding-top: 12px;
 }
